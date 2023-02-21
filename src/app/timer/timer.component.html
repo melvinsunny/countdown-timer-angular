@@ -1,0 +1,29 @@
+<div class="center align-center py-2">
+  <div>
+    <div class="input-group mb-3" style="justify-content: space-between;">
+      <span class="input-group-text">Hours</span>
+      <input type="number" class="form-control me-2" aria-label="Hours" [(ngModel)]="formHours" min="0" max="99">
+      <span class="input-group-text">Minutes</span>
+      <input type="number" class="form-control me-2" aria-label="Minutes"[(ngModel)]="formMinutes" min="0" max="59">
+      <span class="input-group-text">Seconds</span>
+      <input type="number" class="form-control" aria-label="Seconds" [(ngModel)]="formSeconds" min="0" max="59">
+    </div>
+  </div>
+  <div>Remaining Time</div>
+  <div class="timer mb-2" [ngStyle]="{'color': countdownTimer.minutes >= 5 ? 'green' : (countdownTimer.minutes >= 1 ? 'orange' : 'red') }">
+    <div class="" *ngIf="!timerDone">{{ countdownTimer.hours | number:'2.0' }} : {{ countdownTimer.minutes | number:'2.0' }} : {{ countdownTimer.seconds | number:'2.0' }}</div>
+    <div class="" *ngIf="timerDone">- 00 : 00 : 01</div>
+  </div>
+  <button *ngIf="!timerRunning" type="button" class="btn btn-success mt-4 mx-2" (click)="startTimer()">Start</button>
+  <button *ngIf="timerRunning && !timerPaused" type="button" class="btn btn-warning mt-4 mx-2" (click)="pauseTimer()">Pause</button>
+  <button *ngIf="timerRunning && timerPaused" type="button" class="btn btn-primary mt-4 mx-2" (click)="resumeTimer()">Resume</button>
+  <button type="button" class="btn btn-danger mt-4" (click)="resetTimer()">Reset</button>
+  <br>
+  <div *ngIf="timerRunning" class="mt-3">
+    <div class="mb-2">Jog</div>
+    <button type="button" class="btn btn-info mx-2" (click)="jogTimer(1)">1 minute</button>
+    <button type="button" class="btn btn-info mx-2" (click)="jogTimer(5)">5 minutes</button>
+  </div>
+
+  <div *ngIf="!validTimer" class="mt-2" style="color: red;">Please enter valid time.</div>
+</div>
