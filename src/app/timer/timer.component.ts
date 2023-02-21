@@ -29,6 +29,7 @@ export class TimerComponent implements OnInit, OnDestroy {
 
   setTimer() {
     this.countdownTimer.seconds--;
+    // Decrement minutes/hours
     if (this.countdownTimer.seconds < 0) {
       this.countdownTimer.seconds = 59;
       this.countdownTimer.minutes--;
@@ -40,6 +41,7 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   validateTimer() {
+    // Validate timer to be within valid ranges
     return ((typeof this.formHours === "number" && this.formHours >= 0 && this.formHours <= 99) && (typeof this.formMinutes === "number" && this.formMinutes >= 0 && this.formMinutes <= 59) && (typeof this.formSeconds === "number" && this.formSeconds >= 0 && this.formSeconds <= 59)) && (this.formHours !== 0 || this.formMinutes !== 0 || this.formSeconds !== 0);
   }
 
@@ -54,6 +56,7 @@ export class TimerComponent implements OnInit, OnDestroy {
       this.countdownTimer.hours = this.formHours && typeof this.formHours === "number" ? this.formHours : 0;
       this.countdownTimer.minutes = this.formMinutes && typeof this.formMinutes === "number" ? this.formMinutes : 0;
       this.countdownTimer.seconds = this.formSeconds && typeof this.formSeconds === "number" ? this.formSeconds : 0;
+      // Decrement second variable every seconds
       this.countdownSubscription = interval(1000)
         .subscribe(x => {
           this.setTimer();
