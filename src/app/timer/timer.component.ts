@@ -44,6 +44,7 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   startTimer() {
+    this.timerPaused = false;
     if (!this.validateTimer()) {
       this.validTimer = false;
     } else {
