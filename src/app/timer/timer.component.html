@@ -10,9 +10,8 @@
     </div>
   </div>
   <div>Remaining Time</div>
-  <div class="timer mb-2" [ngStyle]="{'color': countdownTimer.minutes >= 5 ? 'green' : (countdownTimer.minutes >= 1 ? 'orange' : 'red') }">
-    <div class="" *ngIf="!timerDone">{{ countdownTimer.hours | number:'2.0' }} : {{ countdownTimer.minutes | number:'2.0' }} : {{ countdownTimer.seconds | number:'2.0' }}</div>
-    <div class="" *ngIf="timerDone">- 00 : 00 : 01</div>
+  <div class="timer mb-2" [ngStyle]="{'color': (!negativeTimer && (countdownTimer.minutes >= 5 || countdownTimer.hours >= 1)) ? 'green' : ((!negativeTimer && countdownTimer.minutes >= 1) ? 'orange' : 'red') }">
+    <div class=""><span *ngIf="negativeTimer && !(countdownTimer.hours === 0 && countdownTimer.minutes === 0 && countdownTimer.seconds === 0)">- </span>{{ countdownTimer.hours | number:'2.0' }} : {{ countdownTimer.minutes | number:'2.0' }} : {{ countdownTimer.seconds | number:'2.0' }}</div>
   </div>
   <button *ngIf="!timerRunning" type="button" class="btn btn-success mt-4 mx-2" (click)="startTimer()">Start</button>
   <button *ngIf="timerRunning && !timerPaused" type="button" class="btn btn-warning mt-4 mx-2" (click)="pauseTimer()">Pause</button>
@@ -21,8 +20,28 @@
   <br>
   <div *ngIf="timerRunning" class="mt-3">
     <div class="mb-2">Jog</div>
-    <button type="button" class="btn btn-info mx-2" (click)="jogTimer(1)">1 minute</button>
-    <button type="button" class="btn btn-info mx-2" (click)="jogTimer(5)">5 minutes</button>
+    <div class="row align-items-center">
+      <div class="col-sm-5 text-end">
+        <fa-icon [icon]="faMinus" (click)="jogTimer(-60)"></fa-icon>
+      </div>
+      <div class="col-sm-2">
+        <div style="font-size: 1.2rem; align-items: center;" class="text-center">1 minute</div>
+      </div>
+      <div class="col-sm-5 text-start">
+        <fa-icon [icon]="faPlus" (click)="jogTimer(60)"></fa-icon>
+      </div>
+    </div>
+    <div class="row align-items-center">
+      <div class="col-sm-5 text-end">
+        <fa-icon [icon]="faMinus" (click)="jogTimer(-300)"></fa-icon>
+      </div>
+      <div class="col-sm-2">
+        <div style="font-size: 1.2rem; align-items: center;" class="text-center">5 minutes</div>
+      </div>
+      <div class="col-sm-5 text-start">
+        <fa-icon [icon]="faPlus" (click)="jogTimer(300)"></fa-icon>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="!validTimer" class="mt-2" style="color: red;">Please enter valid time.</div>

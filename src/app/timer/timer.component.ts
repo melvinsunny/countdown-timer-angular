@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { Timer } from '../models/timer.model';
+import { faPlusSquare, faMinusSquare } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
   selector: 'app-timer',
@@ -8,35 +9,40 @@ import { Timer } from '../models/timer.model';
   styleUrls: ['./timer.component.css']
 })
 
-export class TimerComponent implements OnInit, OnDestroy {
+export class TimerComponent implements OnDestroy {
   countdownSubscription: Subscription = new Subscription;
   countdownTimer: Timer = new Timer;
   timerRunning: boolean = false;
-  timerDone: boolean = false;
   formHours: number = 0;
   formMinutes: number = 0;
   formSeconds: number = 0;
   validTimer: boolean = true;
   timerPaused: boolean = false;
-
-  ngOnInit() {
-
-  }
+  negativeTimer: boolean = false;
+  faPlus = faPlusSquare;
+  faMinus = faMinusSquare;
 
   ngOnDestroy() {
     this.countdownSubscription.unsubscribe();
   }
 
-  setTimer() {
-    this.countdownTimer.seconds--;
-    // Decrement minutes/hours
-    if (this.countdownTimer.seconds < 0) {
-      this.countdownTimer.seconds = 59;
-      this.countdownTimer.minutes--;
-      if (this.countdownTimer.minutes < 0) {
-        this.countdownTimer.minutes = 59;
-        this.countdownTimer.hours--;
-      }
+  setTimerValue(seconds: number) {
+    this.countdownTimer.hours = Math.floor(seconds / (60 * 60));
+    this.countdownTimer.minutes = Math.floor((seconds % (60 * 60)) / 60)
+    this.countdownTimer.seconds = (seconds % (60 * 60)) % 60
+  }
+
+
+  setTimer(sign: string) {
+    let currSecs = this.countdownTimer.hours * 60 * 60 + this.countdownTimer.minutes * 60 + this.countdownTimer.seconds;
+    if (sign === 'negative') {
+      currSecs++;
+    } else {
+      currSecs--
+    }
+
+    if (currSecs >= 0) {
+      this.setTimerValue(currSecs);
     }
   }
 
@@ -46,29 +52,31 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   startTimer() {
+    this.negativeTimer = false;
     this.timerPaused = false;
     if (!this.validateTimer()) {
       this.validTimer = false;
     } else {
       this.validTimer = true;
-      this.timerDone = false;
       this.timerRunning = true;
       this.countdownTimer.hours = this.formHours && typeof this.formHours === "number" ? this.formHours : 0;
       this.countdownTimer.minutes = this.formMinutes && typeof this.formMinutes === "number" ? this.formMinutes : 0;
       this.countdownTimer.seconds = this.formSeconds && typeof this.formSeconds === "number" ? this.formSeconds : 0;
       // Decrement second variable every seconds
       this.countdownSubscription = interval(1000)
-        .subscribe(x => {
-          this.setTimer();
-          this.timerRunning = true;
-          if (this.countdownTimer.seconds <= 0 && this.countdownTimer.minutes === 0 && this.countdownTimer.hours === 0) {
-            this.countdownSubscription.unsubscribe();
-            setTimeout(() => {
-              this.timerDone = true;
-              this.timerRunning = false;
-            }, 1000);
-          }
-        });
+        .subscribe(x => this.initiateTimer());
+    }
+  }
+
+  initiateTimer() {
+    if (this.negativeTimer) {
+      this.setTimer('negative');
+    } else {
+      this.setTimer('positive');
+    }
+    this.timerRunning = true;
+    if (this.countdownTimer.seconds === 0 && this.countdownTimer.minutes === 0 && this.countdownTimer.hours === 0) {
+      this.negativeTimer = true;
     }
   }
 
@@ -80,17 +88,7 @@ export class TimerComponent implements OnInit, OnDestroy {
   resumeTimer() {
     this.timerPaused = false;
     this.countdownSubscription = interval(1000)
-        .subscribe(x => {
-          this.setTimer();
-          this.timerRunning = true;
-          if (this.countdownTimer.seconds <= 0 && this.countdownTimer.minutes === 0 && this.countdownTimer.hours === 0) {
-            this.countdownSubscription.unsubscribe();
-            setTimeout(() => {
-              this.timerDone = true;
-              this.timerRunning = false;
-            }, 1000);
-          }
-        });
+      .subscribe(x => this.initiateTimer());
   }
 
   resetTimer() {
@@ -103,15 +101,22 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.timerRunning = false;
     this.timerPaused = false;
     this.validTimer = true;
-    this.timerDone = false;
+    this.negativeTimer = false;
     this.countdownSubscription.unsubscribe();
   }
 
-  jogTimer(minutes: number) {
-    this.countdownTimer.minutes += minutes;
-    if (this.countdownTimer.minutes > 59) {
-      this.countdownTimer.minutes = (this.countdownTimer.minutes) % 60;
-      this.countdownTimer.hours++;
+  jogTimer(seconds: number) {
+    let currSecs = this.countdownTimer.hours * 60 * 60 + this.countdownTimer.minutes * 60 + this.countdownTimer.seconds;
+    if (this.negativeTimer) {
+      currSecs *= -1;
     }
+    let newSecs = currSecs + seconds;
+    if (newSecs < 0) {
+      this.negativeTimer = true;
+      newSecs *= -1;
+    } else {
+      this.negativeTimer = false;
+    }
+    this.setTimerValue(newSecs);
   }
 }
